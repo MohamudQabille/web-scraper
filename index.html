@@ -1,263 +1,427 @@
+<!-- ===============================
+File: frontend/index.html
+=============================== -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Web Scraper</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #333;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        input[type="url"] {
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-        input[type="url"]:focus {
-            border-color: #007bff;
-            outline: none;
-        }
-        button {
-            padding: 12px 24px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        .flash-messages {
-            margin-bottom: 20px;
-        }
-        .flash-message {
-            padding: 10px;
-            border-radius: 4px;
-            margin-bottom: 10px;
-        }
-        .flash-message.error {
-            background-color: #ffebee;
-            color: #c62828;
-            border: 1px solid #ffcdd2;
-        }
-        .loading {
-            display: none;
-            text-align: center;
-            margin-top: 20px;
-        }
-        form.loading .loading {
-            display: block;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        .help-text {
-            font-size: 0.9em;
-            color: #666;
-            margin-top: 4px;
-        }
-        .advanced-options {
-            border: 1px solid #ddd;
-            padding: 15px;
-            border-radius: 4px;
-            margin-top: 15px;
-        }
-        .advanced-options summary {
-            cursor: pointer;
-            padding: 5px;
-            font-weight: bold;
-        }
-    </style>
+    <title>Web Scraper to CSV</title>
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Advanced Web Scraper</h1>
-        
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <div class="flash-messages">
-                    {% for category, message in messages %}
-                        <div class="flash-message {{ category }}">{{ message }}</div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        {% endwith %}
+<div class="container">
+    <h1>🕷️ Web Scraper to CSV</h1>
 
-        <div class="action-buttons">
-            <button onclick="showForm('scrape-form')" class="tab-button active">Scrape Data</button>
-            <button onclick="showForm('html-form')" class="tab-button">Download HTML</button>
+    <form id="scraperForm">
+        <div class="input-group">
+            <label for="url">Website URL:</label>
+            <input type="url" id="url" placeholder="https://example.com" required>
         </div>
 
-        <!-- Existing Scrape Form -->
-        <form action="/scrape" method="post" id="scrape-form" class="form-section active">
-            <div class="form-group">
-                <label for="url">Website URL:</label>
-                <input type="url" id="url" name="url" placeholder="Enter website URL (e.g., https://example.com)" required>
-            </div>
-
-            <div class="form-group">
-                <label for="max_pages">Maximum Pages to Scrape:</label>
-                <input type="number" id="max_pages" name="max_pages" value="5" min="1" max="50">
-                <div class="help-text">Number of pages to scrape (1-50)</div>
-            </div>
-
-            <details class="advanced-options">
-                <!-- Add this inside the scrape-form, before the submit button -->
-                <div class="filter-group">
-                    <h3>Advanced Options</h3>
-                    
-                    <div class="form-group">
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="download_images" value="true">
-                            Download Images
-                        </label>
-                        <div class="help-text">Save images found on the pages</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="use_proxies" value="true">
-                            Use Proxy Rotation
-                        </label>
-                        <div class="help-text">Rotate through proxy servers (if configured)</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="requests_per_second">Requests Per Second:</label>
-                        <input type="number" id="requests_per_second" name="requests_per_second" 
-                               value="2" min="1" max="10">
-                        <div class="help-text">Limit request rate to avoid blocking (1-10)</div>
-                    </div>
+        <div class="scrape-options">
+            <label>What to scrape:</label>
+            <div class="option-group">
+                <div class="checkbox-item">
+                    <input type="checkbox" id="scrapeText" checked>
+                    <label for="scrapeText">Text Content</label>
                 </div>
-                <div class="form-group">
-                    <label for="elements">Target Elements:</label>
-                    <input type="text" id="elements" name="elements" placeholder="p,h1,h2,a,div">
-                    <div class="help-text">Comma-separated list of HTML elements to scrape</div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="scrapeLinks" checked>
+                    <label for="scrapeLinks">Links</label>
                 </div>
-
-                <div class="form-group">
-                    <label for="css_selector">CSS Selector:</label>
-                    <input type="text" id="css_selector" name="css_selector" placeholder=".article-content, #main-content">
-                    <div class="help-text">CSS selector to target specific elements</div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="scrapeImages">
+                    <label for="scrapeImages">Images</label>
                 </div>
-
-                <div class="form-group">
-                    <label for="xpath_selector">XPath/Text Pattern:</label>
-                    <input type="text" id="xpath_selector" name="xpath_selector" placeholder="Price: \$\d+\.\d+">
-                    <div class="help-text">Regular expression pattern to match text content</div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="scrapeTables">
+                    <label for="scrapeTables">Tables</label>
                 </div>
-            </details>
-
-            <button type="submit">Scrape and Download CSV</button>
-            <div class="loading">
-                Processing... Please wait...
+                <div class="checkbox-item">
+                    <input type="checkbox" id="scrapeHeadings">
+                    <label for="scrapeHeadings">Headings</label>
+                </div>
             </div>
-        </form>
+        </div>
 
-        <!-- New HTML Download Form -->
-        <form action="/download_html" method="post" id="html-form" class="form-section">
-            <div class="form-group">
-                <label for="html-url">Website URL:</label>
-                <input type="url" id="html-url" name="url" placeholder="Enter website URL (e.g., https://example.com)" required>
-            </div>
+        <button type="submit" class="btn">🚀 Scrape Website</button>
+    </form>
 
-            <div class="form-group">
-                <label for="html-max-pages">Number of Pages:</label>
-                <input type="number" id="html-max-pages" name="max_pages" value="1" min="1" max="50">
-                <div class="help-text">Number of consecutive pages to download (follows 'Next' links)</div>
-            </div>
-
-            <button type="submit">Download HTML</button>
-            <div class="loading">
-                Processing... Please wait...
-            </div>
-        </form>
+    <div class="loading" id="loading">
+        <div class="loading-spinner"></div>
+        <p>Scraping website data...</p>
     </div>
 
-    <style>
-        /* Add these new styles */
-        .action-buttons {
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        .tab-button {
-            padding: 10px 20px;
-            margin: 0 5px;
-            border: none;
-            border-radius: 4px;
-            background-color: #ddd;
-            cursor: pointer;
-        }
-        .tab-button.active {
-            background-color: #007bff;
-            color: white;
-        }
-        .form-section {
-            display: none;
-        }
-        .form-section.active {
-            display: block;
-        }
-    </style>
+    <div class="message error" id="error"></div>
+    <div class="message success" id="success"></div>
 
-    <script>
-    function showForm(formId) {
-        // Hide all forms
-        document.querySelectorAll('.form-section').forEach(form => {
-            form.classList.remove('active');
-        });
-        // Show selected form
-        document.getElementById(formId).classList.add('active');
-        
-        // Update button states
-        document.querySelectorAll('.tab-button').forEach(button => {
-            button.classList.remove('active');
-        });
-        event.target.classList.add('active');
-    }
+    <div class="results" id="results">
+        <h3>📊 Scraped Data Preview</h3>
+        <p id="dataCount"></p>
+        <div class="table-container">
+            <table class="preview-table" id="previewTable"></table>
+        </div>
+        <button type="button" class="btn" id="downloadBtn">📥 Download CSV</button>
+    </div>
+</div>
 
-    // Add loading state to HTML form
-    document.getElementById('html-form').addEventListener('submit', function(e) {
-        this.classList.add('loading');
-        document.querySelector('button[type="submit"]').disabled = true;
-    });
-    </script>
+<script src="js/utils.js"></script>
+<script src="js/main.js"></script>
 </body>
 </html>
+
+/* ===============================
+File: frontend/css/styles.css
+=============================== */
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+body {
+font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+min-height: 100vh;
+padding: 20px;
+line-height: 1.6;
+}
+
+.container {
+max-width: 900px;
+margin: 0 auto;
+background: rgba(255, 255, 255, 0.95);
+backdrop-filter: blur(10px);
+border-radius: 20px;
+padding: 40px;
+box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+text-align: center;
+color: #333;
+margin-bottom: 30px;
+font-size: 2.5rem;
+background: linear-gradient(45deg, #667eea, #764ba2);
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+background-clip: text;
+}
+
+h3 {
+color: #333;
+margin-bottom: 15px;
+font-size: 1.5rem;
+}
+
+.input-group {
+margin-bottom: 25px;
+}
+
+label {
+display: block;
+margin-bottom: 8px;
+font-weight: 600;
+color: #555;
+}
+
+input[type="url"], select {
+width: 100%;
+padding: 15px;
+border: 2px solid #e1e5e9;
+border-radius: 10px;
+font-size: 16px;
+transition: all 0.3s ease;
+background: white;
+}
+
+input[type="url"]:focus, select:focus {
+outline: none;
+border-color: #667eea;
+box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.scrape-options {
+background: #f8f9ff;
+padding: 25px;
+border-radius: 15px;
+margin: 25px 0;
+border: 1px solid #e1e5e9;
+}
+
+.option-group {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+gap: 15px;
+margin-top: 15px;
+}
+
+.checkbox-item {
+display: flex;
+align-items: center;
+gap: 10px;
+padding: 10px;
+background: white;
+border-radius: 8px;
+border: 1px solid #e1e5e9;
+transition: all 0.3s ease;
+}
+
+.checkbox-item:hover {
+background: #f0f4ff;
+border-color: #667eea;
+}
+
+input[type="checkbox"] {
+width: 18px;
+height: 18px;
+accent-color: #667eea;
+cursor: pointer;
+}
+
+.checkbox-item label {
+margin: 0;
+cursor: pointer;
+color: #333;
+}
+
+.btn {
+background: linear-gradient(45deg, #667eea, #764ba2);
+color: white;
+border: none;
+padding: 15px 30px;
+border-radius: 10px;
+font-size: 16px;
+font-weight: 600;
+cursor: pointer;
+transition: all 0.3s ease;
+width: 100%;
+margin: 10px 0;
+position: relative;
+overflow: hidden;
+}
+
+.btn:hover {
+transform: translateY(-2px);
+box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+}
+
+.btn:active {
+transform: translateY(0);
+}
+
+.btn:disabled {
+opacity: 0.6;
+cursor: not-allowed;
+transform: none;
+}
+
+.loading {
+display: none;
+text-align: center;
+margin: 30px 0;
+padding: 20px;
+background: #f8f9ff;
+border-radius: 10px;
+}
+
+.loading-spinner {
+border: 3px solid #f3f3f3;
+border-top: 3px solid #667eea;
+border-radius: 50%;
+width: 40px;
+height: 40px;
+animation: spin 1s linear infinite;
+margin: 0 auto 15px;
+}
+
+@keyframes spin {
+0% { transform: rotate(0deg); }
+100% { transform: rotate(360deg); }
+}
+
+.message {
+padding: 15px 20px;
+border-radius: 10px;
+margin: 15px 0;
+display: none;
+font-weight: 500;
+}
+
+.message.error {
+background: #ffe6e6;
+border: 1px solid #ffcccc;
+color: #cc0000;
+}
+
+.message.success {
+background: #e6ffe6;
+border: 1px solid #ccffcc;
+color: #006600;
+}
+
+.results {
+margin-top: 30px;
+padding: 25px;
+background: #f8f9ff;
+border-radius: 15px;
+display: none;
+border: 1px solid #e1e5e9;
+}
+
+.table-container {
+overflow-x: auto;
+margin: 20px 0;
+border-radius: 10px;
+box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.preview-table {
+width: 100%;
+border-collapse: collapse;
+background: white;
+border-radius: 10px;
+overflow: hidden;
+font-size: 14px;
+}
+
+.preview-table th, .preview-table td {
+padding: 12px 15px;
+text-align: left;
+border-bottom: 1px solid #e1e5e9;
+vertical-align: top;
+}
+
+.preview-table th {
+background: linear-gradient(45deg, #667eea, #764ba2);
+color: white;
+font-weight: 600;
+font-size: 13px;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+}
+
+.preview-table tr:hover {
+background: #f8f9ff;
+}
+
+.preview-table td {
+max-width: 300px;
+word-wrap: break-word;
+overflow-wrap: break-word;
+}
+
+#dataCount {
+font-weight: 600;
+color: #667eea;
+margin-bottom: 10px;
+font-size: 16px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+.container {
+padding: 20px;
+margin: 10px;
+}
+
+h1 {
+font-size: 2rem;
+}
+
+.option-group {
+grid-template-columns: 1fr;
+}
+
+.preview-table {
+font-size: 12px;
+}
+
+.preview-table th, .preview-table td {
+padding: 8px 10px;
+}
+}
+
+@media (max-width: 480px) {
+.container {
+padding: 15px;
+}
+
+h1 {
+font-size: 1.8rem;
+}
+
+.btn {
+padding: 12px 20px;
+font-size: 14px;
+}
+}
+
+// ===============================
+// File: frontend/js/utils.js
+// ===============================
+// Utility functions for the web scraper
+
+// API Configuration
+const API_BASE_URL = 'http://localhost:5000/api';
+
+// Validate URL format
+function isValidUrl(string) {
+try {
+new URL(string);
+return true;
+} catch (_) {
+return false;
+}
+}
+
+// Show/hide loading spinner
+function showLoading(show = true) {
+const loading = document.getElementById('loading');
+loading.style.display = show ? 'block' : 'none';
+}
+
+// Show error message
+function showError(message) {
+const errorDiv = document.getElementById('error');
+errorDiv.textContent = message;
+errorDiv.style.display = 'block';
+
+// Hide other messages
+document.getElementById('success').style.display = 'none';
+}
+
+// Show success message
+function showSuccess(message) {
+const successDiv = document.getElementById('success');
+successDiv.textContent = message;
+successDiv.style.display = 'block';
+
+// Hide other messages
+document.getElementById('error').style.display = 'none';
+}
+
+// Hide all messages
+function hideMessages() {
+document.getElementById('error').style.display = 'none';
+document.getElementById('success').style.display = 'none';
+}
+
+// Convert data to CSV format
+function convertToCSV(data) {
+if (!data || data.length === 0) return '';
+
+const headers = Object.keys(data[0]);
+const csvHeaders = headers.join(',');
+
+const csvRows = data.map(row => {
+return headers.map(header => {
+let value = row[header] || '';
+
+// Convert to string and escape quotes
+value = String(value).replace(/"/g, '""');
+
+// Wrap in quotes if contains comma, quote, or newline
+if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+value = `

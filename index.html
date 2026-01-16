@@ -127,6 +127,7 @@
 
         <!-- Existing Scrape Form -->
         <form action="/scrape" method="post" id="scrape-form" class="form-section active">
+            {{ form.csrf_token }}
             <div class="form-group">
                 <label for="url">Website URL:</label>
                 <input type="url" id="url" name="url" placeholder="Enter website URL (e.g., https://example.com)" required>
@@ -193,6 +194,7 @@
 
         <!-- New HTML Download Form -->
         <form action="/download_html" method="post" id="html-form" class="form-section">
+            {{ form.csrf_token }}
             <div class="form-group">
                 <label for="html-url">Website URL:</label>
                 <input type="url" id="html-url" name="url" placeholder="Enter website URL (e.g., https://example.com)" required>
@@ -205,10 +207,13 @@
             </div>
 
             <!-- Add this inside your form -->
+            <!-- Remove this duplicate field -->
+            <!--
             <div class="form-group">
                 <label for="max_pages">Maximum Pages (optional):</label>
                 <input type="number" class="form-control" id="max_pages" name="max_pages" min="1" placeholder="Leave empty for unlimited">
             </div>
+            -->
 
             <button type="submit">Download HTML</button>
             <div class="loading">
